@@ -2,7 +2,7 @@
 
 **Repository:** [https://github.com/FinnaCloud/finna-pk](https://github.com/FinnaCloud/finna-pk)
 
-> **Note:** This is a fork of [openpubkey/finna-pk](https://github.com/openpubkey/finna-pk), customized to fit our specific use case. The original project is [OpenPubkey](https://github.com/openpubkey/openpubkey), a Linux Foundation project.
+> **Note:** This is a fork of [openpubkey/opkssh](https://github.com/openpubkey/opkssh) and [openpubkey/openpubkey](https://github.com/openpubkey/openpubkey), customized to fit our specific use case.
 
 ## Overview
 

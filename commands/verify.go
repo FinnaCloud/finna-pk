@@ -22,8 +22,8 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/verifier"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/verifier"
 	"github.com/openpubkey/opkssh/commands/config"
 	"github.com/openpubkey/opkssh/policy"
 	"github.com/openpubkey/opkssh/policy/files"

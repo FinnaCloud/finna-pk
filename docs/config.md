@@ -1,7 +1,7 @@
-# opkssh configuration files
+# finna-pk configuration files
 
-Herein we document the various configuration files used by opkssh.
-The documentation for the `/etc/opk/policy.d/` policy plugin system is found [here](policyplugins.md).
+Herein we document the various configuration files used by finna-pk.
+The documentation for the `/etc/finna-pk/policy.d/` policy plugin system is found [here](policyplugins.md).
 
 All our configuration files are space delimited like ssh authorized key files.
 We have the follow syntax rules:
@@ -10,12 +10,12 @@ We have the follow syntax rules:
 
 Our goal is to have an distinct meaning for each column. This way if we want to extend the rules we can add additional columns.
 
-## Client config `~/.opk/config.yml`
+## Client config `~/.finna-pk/config.yml`
 
-The config file for the client is saved in `~/.opk/config.yml`.
+The config file for the client is saved in `~/.finna-pk/config.yml`.
 It configures which OpenID Providers the user can log in with.
-This file is not required to exist to use opkssh and it is not created by default.
-To create it, simple run `~/opkssh login --create-config`.
+This file is not required to exist to use finna-pk and it is not created by default.
+To create it, simple run `~/finna-pk login --create-config`.
 
 The default client config can be found in [../commands/config/default-client-config.yml](../commands/config/default-client-config.yml).
 
@@ -24,7 +24,7 @@ The client config can be used to configure the following values:
 - **default_provider** By default this is set to the webchooser, which opens a webpage and allows the user to select the OpenID Provider they want by clicking. However if you wish to always connect to one particular OpenID Provider you can set this to the alias of that OpenID Provider and it will skip the web chooser and automatically just open a browser window to that provider.
 
 - **providers** This allows you to configure all the OpenID Providers you wish to use. See example below.
-  - **send_access_token** Is a boolean value scoped to a particular provider. It determines if opkssh should put the user's access token into the SSH public key (SSH Certificate). This is useful for allowing the opkssh verifier to read claims not available in the ID Token that can only be read from the OpenID Provider's [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo). The opkssh verifier on the SSH server will use the access token to make a call to the OpenID Provider's userinfo endpoint. Configuration option false by default as SSH will send SSH Public Keys to any host you are attempting to SSH into. Before setting this to true carefully consider the security implications of including the access token in the SSH Public key.
+  - **send_access_token** Is a boolean value scoped to a particular provider. It determines if finna-pk should put the user's access token into the SSH public key (SSH Certificate). This is useful for allowing the finna-pk verifier to read claims not available in the ID Token that can only be read from the OpenID Provider's [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo). The finna-pk verifier on the SSH server will use the access token to make a call to the OpenID Provider's userinfo endpoint. Configuration option false by default as SSH will send SSH Public Keys to any host you are attempting to SSH into. Before setting this to true carefully consider the security implications of including the access token in the SSH Public key.
 
 ```yaml
 ---
@@ -59,10 +59,10 @@ providers:
 
 ```
 
-## Server config `/etc/opk/config.yml`
+## Server config `/etc/finna-pk/config.yml`
 
-This is the config file for opkssh when used on the SSH server.
-It supports setting additional environment variables when `opkssh verify` is called.
+This is the config file for finna-pk when used on the SSH server.
+It supports setting additional environment variables when `finna-pk verify` is called.
 For instance if you want to specify the URI of a proxy server you can pass the environment variable HTTPS_PROXY:
 
 ```yml
@@ -71,7 +71,7 @@ env_vars:
   HTTPS_PROXY: http://yourproxy:3128
 ```
 
-It also supports a `deny_emails` field. This field is a YAML array of strings, where each string is an email address opkssh should never allow. An ID Token has a claim for an email on this list it will reject it.
+It also supports a `deny_emails` field. This field is a YAML array of strings, where each string is an email address finna-pk should never allow. An ID Token has a claim for an email on this list it will reject it.
 
 ```yml
 ---
@@ -80,10 +80,10 @@ deny_emails:
   - "user2@example.com"
 ```
 
-- When a user attempts to authenticate, OPKSSH checks if their email is present in the `deny_emails` list.
+- When a user attempts to authenticate, FINNA-PK checks if their email is present in the `deny_emails` list.
 - If a match is found (case-insensitive), authentication is denied, regardless of other authorization policies.
 
-It also supports a `deny_users` field. This field is a YAML array of strings, where each string is a user (linux principal) that opkssh never allow. This is equivalent to the `DenyUsers` field in [sshd_config](https://man.openbsd.org/sshd_config).
+It also supports a `deny_users` field. This field is a YAML array of strings, where each string is a user (linux principal) that finna-pk never allow. This is equivalent to the `DenyUsers` field in [sshd_config](https://man.openbsd.org/sshd_config).
 
 Both `deny_emails` and `deny_users` are evaluated before policy.
 
@@ -92,14 +92,14 @@ Both `deny_emails` and `deny_users` are evaluated before policy.
 The server config file requires the following permissions be set:
 
 ```bash
-sudo chown root:opksshuser /etc/opk/config.yml
-sudo chmod 640 /etc/opk/config.yml
+sudo chown root:finna-pkuser /etc/finna-pk/config.yml
+sudo chmod 640 /etc/finna-pk/config.yml
 ```
 
-## Allowed OpenID Providers: `/etc/opk/providers`
+## Allowed OpenID Providers: `/etc/finna-pk/providers`
 
 This file functions as an access control list that enables admins to determine the OpenID Providers and Client IDs they wish to use.
-This file contains a list of allowed OPKSSH OPs (OpenID Providers) and the associated client ID.
+This file contains a list of allowed FINNA-PK OPs (OpenID Providers) and the associated client ID.
 The client ID must match the aud (audience) claim in the PK Token.
 
 ### Columns
@@ -110,7 +110,7 @@ The client ID must match the aud (audience) claim in the PK Token.
 
 ### Examples
 
-The file lives at `/etc/opk/providers`. The default values are:
+The file lives at `/etc/finna-pk/providers`. The default values are:
 
 ```bash
 # Issuer Client-ID expiration-policy 
@@ -119,7 +119,7 @@ https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0 096c
 https://gitlab.com 8d8b7024572c7fd501f64374dec6bba37096783dfcd792b3988104be08cb6923 24h
 ```
 
-## Authorized identities files: `/etc/opk/auth_id` and `/home/{USER}/.opk/auth_id`
+## Authorized identities files: `/etc/finna-pk/auth_id` and `/home/{USER}/.finna-pk/auth_id`
 
 These files contain the policies to determine which identities can assume what linux user accounts.
 Linux user accounts are typically referred to in SSH as *principals* and we use this terminology.
@@ -131,7 +131,7 @@ We support email "wildcard" validation using the `oidc-match-end:email:` prefix.
 - This matching is **case-insensitive**.
 - Use with care, as allowing a domain grants access to all users at that domain.
 
-### System authorized identity file `/etc/opk/auth_id`
+### System authorized identity file `/etc/finna-pk/auth_id`
 
 This is a server wide policy file.
 
@@ -151,7 +151,7 @@ dev oidc-match-end:email:@example.com https://login.microsoftonline.com/9188040d
 
 These `auth_id` files can be edited by hand or you can use the add command to add new policies. The add command has the following syntax.
 
-`sudo opkssh add <user> <email|sub|claim> <issuer>`
+`sudo finna-pk add <user> <email|sub|claim> <issuer>`
 
 For convenience you can use the shorthand `google`, `azure`, `gitlab` rather than specifying the entire issuer.
 This is especially useful in the case of azure where the issuer contains a long and hard to remember random string.
@@ -161,7 +161,7 @@ The following command will allow `alice@example.com` to ssh in as `root`.
 Claims must be prefixed with `oidc:{CLAIM}` e.g. for the group claim `oidc:group`. To allow anyone with the group `admin` to ssh in as root you would run the command:
 
 ```bash
-sudo opkssh add root oidc:group:admin azure
+sudo finna-pk add root oidc:group:admin azure
 ```
 
 Note that currently Google does not put their groups in the ID Token, so groups based auth does not work if you OpenID Provider is Google.
@@ -170,24 +170,24 @@ We support policy on claims that are also URIs as this is a common pattern for g
 To require that root access is only granted to users whose ID Token has a claim `https://acme.com/groups` with the value `ssh-users` run:
 
 ```bash
-sudo opkssh add root oidc:\"https://acme.com/groups\":ssh-users google
+sudo finna-pk add root oidc:\"https://acme.com/groups\":ssh-users google
 ```
 
-which will add that line to your OPKSSH policy file.
+which will add that line to your FINNA-PK policy file.
 
 The system authorized identity file requires the following permissions:
 
 ```bash
-sudo chown root:opksshuser /etc/opk/auth_id
-sudo chmod 640 /etc/opk/auth_id
+sudo chown root:finna-pkuser /etc/finna-pk/auth_id
+sudo chmod 640 /etc/finna-pk/auth_id
 ```
 
 **Note:** The permissions for the system authorized identity file are different than the home authorized identity file.
 
-### Home authorized identity file `/home/{USER}/.opk/auth_id`
+### Home authorized identity file `/home/{USER}/.finna-pk/auth_id`
 
 This is user/principal specific permissions.
-That is, if it is in `/home/alice/.opk/auth_id` it can only specify who can assume the principal `alice` on the server.
+That is, if it is in `/home/alice/.finna-pk/auth_id` it can only specify who can assume the principal `alice` on the server.
 
 ```bash
 # email/sub principal issuer 
@@ -200,8 +200,8 @@ alice oidc:groups:developer https://login.microsoftonline.com/9188040d-6c67-4c5b
 Home authorized identity file requires the following permissions:
 
 ```bash
-chown {USER}:{USER} /home/{USER}/.opk/auth_id
-chmod 600 /home/{USER}/.opk/auth_id
+chown {USER}:{USER} /home/{USER}/.finna-pk/auth_id
+chmod 600 /home/{USER}/.finna-pk/auth_id
 ```
 
 ## See Also

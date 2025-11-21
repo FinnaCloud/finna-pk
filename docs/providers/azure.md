@@ -1,12 +1,12 @@
-# Configuring Azure (Entra ID) for OPKSSH
+# Configuring Azure (Entra ID) for FINNA-PK
 
-Setting up Azure with OPKSSH is simple and should not take more than 10 minutes.
+Setting up Azure with FINNA-PK is simple and should not take more than 10 minutes.
 However Azure is very poorly organized and this leads to wasted time and misconfigurations.
 To make this process as straightforward as possible we provide this guide.
 
-**Note:** If you just want to use Azure with OPKSSH for personal email accounts, you can use default Azure client ID that comes with OPKSSH.
+**Note:** If you just want to use Azure with FINNA-PK for personal email accounts, you can use default Azure client ID that comes with FINNA-PK.
 
-**Something not working?** Open a new issue on <https://github.com/openpubkey/opkssh>
+**Something not working?** Open a new issue on <https://github.com/FinnaCloud/finna-pk>
 
 ## Setup
 
@@ -18,7 +18,7 @@ http://localhost:10001/login-callback
 http://localhost:11110/login-callback
 ```
 
-### 1. Register an App for OPKSSH in Azure
+### 1. Register an App for FINNA-PK in Azure
 
 Sign into <https://portal.azure.com/>, enter "Entra ID" into the search bar, and then click the entry for Entra ID.
 
@@ -30,7 +30,7 @@ This should take you to the app registration page.
 On this page enter openpubkey for your app name.
 Then configure a redirect URI.
 
-While OPKSSH has three redirect URIs Azure only lets you add one here.
+While FINNA-PK has three redirect URIs Azure only lets you add one here.
 You will add the other two later.
 Add the redirect URI `http://localhost:3000/login-callback`.
 Make sure to select public client for the redirect URI.
@@ -56,7 +56,7 @@ This may break the configuration.
 Do not navigate away!
 Scroll down on this page until you get to "Advanced Settings."
 Then click yes for "Allow Public Client Flow".
-**Important** This must be set to Yes for OPKSSH to work.
+**Important** This must be set to Yes for FINNA-PK to work.
 
 ![alt text](azure_figs/allowpublic.png)
 
@@ -68,20 +68,20 @@ It should look like it does here with Redirect URIs showing "3 public client".
 
 ![Set client as public by clicking, allow public client flows](azure_figs/publicclient.png)
 
-### 2. Update client ID on client and service OPKSSH configs
+### 2. Update client ID on client and service FINNA-PK configs
 
-For each server you have installed opkssh on, edit the file `/etc/opk/providers` and set the Azure provider to use the client ID and tenant ID you just registered.
+For each server you have installed finna-pk on, edit the file `/etc/finna-pk/providers` and set the Azure provider to use the client ID and tenant ID you just registered.
 
 ```
 https://login.microsoftonline.com/{TENANT ID}/v2.0 {CLIENT ID} 12h
 ```
 
-To test run `opkssh login --provider="https://login.microsoftonline.com/{TENANT ID}/v2.0,{CLIENT ID}"` with the client ID you registered.
+To test run `finna-pk login --provider="https://login.microsoftonline.com/{TENANT ID}/v2.0,{CLIENT ID}"` with the client ID you registered.
 If this works then server has been setup correctly.
 
-On the client check to see if you have already created a config at `~/.opk/config.yml`. If no config if found, create a config by running `opkssh login --create-config`.
+On the client check to see if you have already created a config at `~/.finna-pk/config.yml`. If no config if found, create a config by running `finna-pk login --create-config`.
 
-Then edit `~/.opk/config.yml` and change the entry for azure to use the client ID and tenant ID from the App Registration.
+Then edit `~/.finna-pk/config.yml` and change the entry for azure to use the client ID and tenant ID from the App Registration.
 
 ```yaml
   - alias: azure microsoft
@@ -96,11 +96,11 @@ Then edit `~/.opk/config.yml` and change the entry for azure to use the client I
       - http://localhost:11110/login-callback
 ```
 
-For more information see: [opkssh configuration files](https://github.com/openpubkey/opkssh/blob/main/docs/config.md).
+For more information see: [finna-pk configuration files](https://github.com/FinnaCloud/finna-pk/blob/main/docs/config.md).
 
 ### 3. Test
 
-Then run `opkssh login` or `opkssh login azure` on the client.
+Then run `finna-pk login` or `finna-pk login azure` on the client.
 This should run without error.
 
 ## Troubleshooting (Common Issues)
@@ -125,7 +125,7 @@ If you want to use consumer accounts with Azure you need to select the option "A
 
 ![select the correct account type](azure_figs/accounttypes.png)
 
-### OPKSSH not seeing Azure groups
+### FINNA-PK not seeing Azure groups
 
 By default Azure/Entra ID does not include the group's claim in ID Token.
 To add it follow the instructions here: [Configure group claims for applications by using Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims)
@@ -136,9 +136,9 @@ To add it follow the instructions here: [Configure group claims for applications
 Message: AADSTS900561: The endpoint only accepts POST requests. Received a GET request.
 ```
 
-On the client check to see if you have already created a config at `~/.opk/config.yml`. If no config is found, create a config by running `opkssh login --create-config`.
+On the client check to see if you have already created a config at `~/.finna-pk/config.yml`. If no config is found, create a config by running `finna-pk login --create-config`.
 
-Edit `~/.opk/config.yml` and for the azure provider change `prompt: consent` to `prompt: none` as shown below.
+Edit `~/.finna-pk/config.yml` and for the azure provider change `prompt: consent` to `prompt: none` as shown below.
 
 ```yaml
   - alias: azure microsoft
@@ -153,4 +153,4 @@ Edit `~/.opk/config.yml` and for the azure provider change `prompt: consent` to 
       - http://localhost:11110/login-callback
 ```
 
-See Issue: [Workaround for error message when using EntraID](https://github.com/openpubkey/opkssh/issues/253).
+See Issue: [Workaround for error message when using EntraID](https://github.com/FinnaCloud/finna-pk/issues/253).

@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openpubkey/openpubkey/providers"
+	"github.com/FinnaCloud/finna-pk/providers"
 	"gopkg.in/yaml.v3"
 )
 
@@ -204,38 +204,6 @@ func (p *ProviderConfig) ToProvider(openBrowser bool) (providers.OpenIdProvider,
 		opts.RedirectURIs = p.RedirectURIs
 		opts.OpenBrowser = openBrowser
 		provider = providers.NewAzureOpWithOptions(opts)
-	} else if strings.HasPrefix(p.Issuer, "https://gitlab.com") {
-		opts := providers.GetDefaultGitlabOpOptions()
-		opts.Issuer = p.Issuer
-		opts.ClientID = p.ClientID
-		opts.GQSign = false
-		if p.hasScopes() {
-			opts.Scopes = p.Scopes
-		}
-		opts.PromptType = p.Prompt
-		opts.AccessType = p.AccessType
-		opts.RedirectURIs = p.RedirectURIs
-		opts.OpenBrowser = openBrowser
-		provider = providers.NewGitlabOpWithOptions(opts)
-	} else if p.Issuer == "https://issuer.hello.coop" {
-		opts := providers.GetDefaultHelloOpOptions()
-		opts.Issuer = p.Issuer
-		opts.ClientID = p.ClientID
-		opts.GQSign = false
-		if p.hasScopes() {
-			opts.Scopes = p.Scopes
-		}
-		opts.PromptType = p.Prompt
-		opts.AccessType = p.AccessType
-		opts.RedirectURIs = p.RedirectURIs
-		opts.OpenBrowser = openBrowser
-		provider = providers.NewHelloOpWithOptions(opts)
-	} else if strings.HasPrefix(p.Issuer, "https://token.actions.githubusercontent.com") {
-		githubOp, err := providers.NewGithubOpFromEnvironment()
-		if err != nil {
-			return nil, fmt.Errorf("error creating github op: %w", err)
-		}
-		provider = githubOp
 	} else {
 		// Generic provider
 		opts := providers.GetDefaultStandardOpOptions(p.Issuer, p.ClientID)

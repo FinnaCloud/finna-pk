@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openpubkey/opkssh/commands"
+	//"github.com/openpubkey/opkssh/commands"
 	"github.com/spf13/afero"
 
 	"github.com/stretchr/testify/require"

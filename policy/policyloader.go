@@ -29,7 +29,7 @@ import (
 
 // SystemDefaultPolicyPath is the default filepath where opkssh policy is
 // defined
-var SystemDefaultPolicyPath = filepath.FromSlash("/etc/opk/auth_id")
+var SystemDefaultPolicyPath = filepath.FromSlash("/etc/finna-pk/auth_id")
 
 // UserLookup defines the minimal interface to lookup users on the current
 // system
@@ -123,14 +123,14 @@ func (s *SystemPolicyLoader) LoadSystemPolicy() (*Policy, Source, error) {
 type OptionalLoader func(h *HomePolicyLoader, username string) ([]byte, error)
 
 // HomePolicyLoader contains methods to read/write the opkssh policy file stored in
-// `~/.opk/ssh` from/to a filesystem. All methods that read policy from the filesystem fail
+// `~/.finna-pk/ssh` from/to a filesystem. All methods that read policy from the filesystem fail
 // and return an error immediately if the permission bits are invalid.
 type HomePolicyLoader struct {
 	*PolicyLoader
 }
 
 // NewHomePolicyLoader returns an opkssh policy loader that uses the os library to
-// read/write policy from/to the user's home directory, e.g. `~/.opk/auth_id`,
+// read/write policy from/to the user's home directory, e.g. `~/.finna-pk/auth_id`,
 func NewHomePolicyLoader() *HomePolicyLoader {
 	return &HomePolicyLoader{
 		PolicyLoader: &PolicyLoader{
@@ -143,7 +143,7 @@ func NewHomePolicyLoader() *HomePolicyLoader {
 	}
 }
 
-// LoadHomePolicy reads the user's opkssh policy at ~/.opk/auth_id (where ~
+// LoadHomePolicy reads the user's opkssh policy at ~/.finna-pk/auth_id (where ~
 // maps to username's home directory) and returns the filepath read. An error is
 // returned if the file cannot be read, if the permission bits are not correct,
 // or if there is no user with username or has no home directory.
@@ -199,7 +199,7 @@ func (h *HomePolicyLoader) LoadHomePolicy(username string, skipInvalidEntries bo
 }
 
 // UserPolicyPath returns the path to the user's opkssh policy file at
-// ~/.opk/auth_id.
+// ~/.finna-pk/auth_id.
 func (h *HomePolicyLoader) UserPolicyPath(username string) (string, error) {
 	user, err := h.UserLookup.Lookup(username)
 	if err != nil {
@@ -210,6 +210,6 @@ func (h *HomePolicyLoader) UserPolicyPath(username string) (string, error) {
 		return "", fmt.Errorf("user %s does not have a home directory", username)
 	}
 
-	policyFilePath := path.Join(userHomeDirectory, ".opk", "auth_id")
+	policyFilePath := path.Join(userHomeDirectory, ".finna-pk", "auth_id")
 	return policyFilePath, nil
 }

@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/providers/mocks"
-	"github.com/openpubkey/opkssh/policy"
+	//"github.com/FinnaCloud/finna-pk/client"
+	//"github.com/FinnaCloud/finna-pk/providers"
+	//"github.com/FinnaCloud/finna-pk/providers/mocks"
+	//"github.com/openpubkey/opkssh/policy"
 	"github.com/stretchr/testify/require"
 )
 

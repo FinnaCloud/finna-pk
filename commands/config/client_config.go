@@ -65,13 +65,13 @@ func ResolveClientConfigPath(configPath *string) error {
 		if dirErr != nil {
 			return fmt.Errorf("failed to get user config dir: %w", dirErr)
 		}
-		*configPath = filepath.Join(dir, ".opk", "config.yml")
+		*configPath = filepath.Join(dir, ".finna-pk", "config.yml")
 	}
 	return nil
 }
 
 // GetClientConfigFromFile retrieves the client config from the configuration file at configPath.
-// If configPath is not specified then the default configuration path is uses ~/.opk/config.yml
+// If configPath is not specified then the default configuration path is uses ~/.finna-pk/config.yml
 func GetClientConfigFromFile(configPath string, Fs afero.Fs) (*ClientConfig, error) {
 	if err := ResolveClientConfigPath(&configPath); err != nil {
 		return nil, err

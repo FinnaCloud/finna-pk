@@ -26,6 +26,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/client/choosers"
+	"github.com/FinnaCloud/finna-pk/commands/config"
+	"github.com/FinnaCloud/finna-pk/oidc"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/sshcert"
+	"github.com/FinnaCloud/finna-pk/util"
 	"io"
 	"log"
 	"os"
@@ -36,14 +44,14 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/client/choosers"
-	"github.com/openpubkey/openpubkey/oidc"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/util"
-	"github.com/openpubkey/opkssh/commands/config"
-	"github.com/openpubkey/opkssh/sshcert"
+	//"github.com/FinnaCloud/finna-pk/client"
+	//"github.com/FinnaCloud/finna-pk/client/choosers"
+	//"github.com/FinnaCloud/finna-pk/oidc"
+	//"github.com/FinnaCloud/finna-pk/pktoken"
+	//"github.com/FinnaCloud/finna-pk/providers"
+	//"github.com/FinnaCloud/finna-pk/util"
+	//"github.com/openpubkey/opkssh/commands/config"
+	//"github.com/openpubkey/opkssh/sshcert"
 	"github.com/spf13/afero"
 	"github.com/thediveo/enumflag/v2"
 	"golang.org/x/crypto/ed25519"
@@ -814,7 +822,7 @@ func IdentityString(pkt pktoken.PKToken) (string, error) {
 	claims := idt.GetClaims()
 	if claims.Email == "" {
 		return fmt.Sprintf(`WARNING: Email claim is missing from ID token. Policies based on email will not work.
-Check if your client config (~/.opk/config.yml) has the correct scopes configured for this OpenID Provider.
+Check if your client config (~/.finna-pk/config.yml) has the correct scopes configured for this OpenID Provider.
 Sub, issuer, audience:
 %s %s %s`, claims.Subject, claims.Issuer, claims.Audience), nil
 	} else {

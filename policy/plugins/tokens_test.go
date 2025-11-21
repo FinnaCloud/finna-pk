@@ -21,9 +21,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/providers"
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/providers"
 	"github.com/stretchr/testify/require"
 )
 

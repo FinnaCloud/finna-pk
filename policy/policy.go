@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
-	"github.com/openpubkey/opkssh/policy/files"
+	//"github.com/openpubkey/opkssh/policy/files"
 )
 
 // User is an opkssh policy user entry

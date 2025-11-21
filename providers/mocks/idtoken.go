@@ -1,0 +1,169 @@
+// Copyright 2024 OpenPubkey
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package mocks
+
+import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/FinnaCloud/finna-pk/oidc"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jws"
+)
+
+type CommitmentType struct {
+	ClaimCommitment bool
+	ClaimName       string
+}
+
+type IDTokenTemplate struct {
+	CommitFunc           func(*IDTokenTemplate, string)
+	Issuer               string
+	Nonce                string
+	NoNonce              bool
+	Aud                  string
+	KeyID                string
+	NoKeyID              bool
+	Alg                  string
+	NoAlg                bool // Even if NOAlg is true, we still need Alg to be set to generate the signature
+	ExtraClaims          map[string]any
+	ExtraProtectedClaims map[string]any
+	SigningKey           crypto.Signer // The key we will use to sign the ID Token
+}
+
+func DefaultIDTokenTemplate() IDTokenTemplate {
+	return IDTokenTemplate{
+		CommitFunc: AddAudCommit,
+		Issuer:     "mockIssuer",
+		Nonce:      "empty",
+		NoNonce:    false,
+		Aud:        "empty",
+		KeyID:      "mockKeyID",
+		NoKeyID:    false,
+		Alg:        "RS256",
+		NoAlg:      false,
+	}
+}
+
+// AddCommit adds the commitment to the CIC to the ID Token. The
+// CommitmentFunc is specified allowing custom commitment functions to be specified
+func (t *IDTokenTemplate) AddCommit(cicHash string) {
+	t.CommitFunc(t, cicHash)
+}
+
+func (t *IDTokenTemplate) IssueTokens() (*oidc.Tokens, error) {
+	subject := Subject{
+		SubjectID: "me",
+		Claims:    t.ExtraClaims,
+		Protected: t.ExtraProtectedClaims,
+	}
+	return t.IssueTokensWithSubject(&subject)
+}
+
+func (t *IDTokenTemplate) IssueTokensWithSubject(subject *Subject) (*oidc.Tokens, error) {
+	headers := jws.NewHeaders()
+	if !t.NoAlg {
+		if err := headers.Set(jws.AlgorithmKey, t.Alg); err != nil {
+			return nil, err
+		}
+	}
+	if !t.NoKeyID {
+		if err := headers.Set(jws.KeyIDKey, t.KeyID); err != nil {
+			return nil, err
+		}
+	}
+	if err := headers.Set(jws.TypeKey, "JWT"); err != nil {
+		return nil, err
+	}
+
+	if subject.Protected != nil {
+		for k, v := range subject.Protected {
+			if err := headers.Set(k, v); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	payloadMap := map[string]any{
+		"sub": subject.SubjectID,
+		"aud": t.Aud,
+		"iss": t.Issuer,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(2 * time.Hour).Unix(),
+	}
+
+	if !t.NoNonce {
+		payloadMap["nonce"] = t.Nonce
+	}
+
+	if subject.Claims != nil {
+		for k, v := range subject.Claims {
+			payloadMap[k] = v
+		}
+	}
+
+	payloadBytes, err := json.Marshal(payloadMap)
+	if err != nil {
+		return nil, err
+	}
+
+	var providerAlg jwa.KeyAlgorithm
+	if _, ok := t.SigningKey.Public().(*rsa.PublicKey); ok {
+		providerAlg = jwa.RS256
+	} else if _, ok := t.SigningKey.Public().(*ecdsa.PublicKey); ok {
+		providerAlg = jwa.ES256
+	} else {
+		return nil, fmt.Errorf("unsupported public key type")
+	}
+
+	if jwa.KeyAlgorithmFrom(t.Alg) != providerAlg {
+		return nil, fmt.Errorf("alg in template (%s) does not match providers signing key alg (%s)", t.Alg, providerAlg)
+	}
+
+	idToken, err := jws.Sign(
+		payloadBytes,
+		jws.WithKey(
+			providerAlg,
+			t.SigningKey,
+			jws.WithProtectedHeaders(headers),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &oidc.Tokens{
+		IDToken:      idToken,
+		RefreshToken: []byte("mock-refresh-token"),
+		AccessToken:  []byte("mock-access-token")}, nil
+}
+
+func AddNonceCommit(idtTemp *IDTokenTemplate, cicHash string) {
+	idtTemp.Nonce = cicHash
+	idtTemp.NoNonce = false
+}
+
+func AddAudCommit(idtTemp *IDTokenTemplate, cicHash string) {
+	idtTemp.Aud = cicHash
+}
+
+func NoClaimCommit(idtTemp *IDTokenTemplate, cicHash string) {
+	// Do nothing
+}

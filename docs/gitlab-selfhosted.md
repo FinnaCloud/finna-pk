@@ -2,11 +2,11 @@
 
 ### Create an OAuth Application in Gitlab
 
-Create an OAuth application in your Gitlab instance that allows opkssh access.
+Create an OAuth application in your Gitlab instance that allows finna-pk access.
 
 1. Go to the Gitlab Admin page
 2. Go to Applications, add a new application
-3. Give it a descriptive name (Users will see this name when they authorize opkssh)
+3. Give it a descriptive name (Users will see this name when they authorize finna-pk)
 4. For the redirect URI's enter:
     ```
     http://localhost:3000/login-callback
@@ -39,7 +39,7 @@ providers:
 You can then log in using your Gitlab instance via
 
 ```
-opkssh login my-gitlab
+finna-pk login my-gitlab
 ```
 
 ### Configure the server
@@ -53,5 +53,5 @@ https://my-gitlab-url.com <Application ID> 24h
 Then add identities to the policy to allow those identities to SSH to the server:
 
 ```
-opkssh add root alice@example.com https://my-gitlab-url.com
+finna-pk add root alice@example.com https://my-gitlab-url.com
 ```

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openpubkey/opkssh/internal/projectpath"
+	//"github.com/openpubkey/opkssh/internal/projectpath"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"

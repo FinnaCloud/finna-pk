@@ -28,11 +28,11 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/util"
 	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/util"
 	"github.com/openpubkey/opkssh/commands/config"
 	"github.com/openpubkey/opkssh/sshcert"
 	"github.com/spf13/afero"

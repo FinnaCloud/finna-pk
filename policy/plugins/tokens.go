@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openpubkey/openpubkey/pktoken"
+	"github.com/FinnaCloud/finna-pk/pktoken"
 )
 
 func PopulatePluginEnvVars(pkt *pktoken.PKToken, userInfoJson string, principal string, sshCert string, keyType string) (map[string]string, error) {

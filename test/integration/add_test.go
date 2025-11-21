@@ -25,9 +25,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/openpubkey/opkssh/policy"
-	"github.com/openpubkey/opkssh/policy/files"
-	"github.com/openpubkey/opkssh/test/integration/ssh_server"
+	//"github.com/openpubkey/opkssh/policy"
+	//"github.com/openpubkey/opkssh/policy/files"
+	//"github.com/openpubkey/opkssh/test/integration/ssh_server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -115,7 +115,7 @@ func TestAdd(t *testing.T) {
 			shouldCmdFail:             false,
 		},
 		{
-			name:                      "unprivileged user creates an auth_id file (no preexisting ~/.opk/auth_id file)",
+			name:                      "unprivileged user creates an auth_id file (no preexisting ~/.finna-pk/auth_id file)",
 			binaryPath:                "/usr/local/bin/opkssh",
 			useSudo:                   false,
 			cmdUser:                   UnprivUser,
@@ -169,7 +169,7 @@ func TestAdd(t *testing.T) {
 				expectedPerms = "640"
 				isUserPolicyFile = false
 			} else {
-				expectedPolicyFilepath = path.Join("/home/", tt.cmdUser, ".opk", "auth_id")
+				expectedPolicyFilepath = path.Join("/home/", tt.cmdUser, ".finna-pk", "auth_id")
 				expectedUser = tt.cmdUser
 				expectedGroup = tt.cmdUser
 				expectedPerms = "600"

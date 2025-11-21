@@ -24,11 +24,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/verifier"
 	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/verifier"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 )

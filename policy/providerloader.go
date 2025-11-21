@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/verifier"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/verifier"
 	"github.com/openpubkey/opkssh/policy/files"
 	"github.com/spf13/afero"
 )

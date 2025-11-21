@@ -22,7 +22,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ServerConfig struct to represent the /etc/opk/config.yml file that runs on the server that the user is SSHing into
+// ServerConfig struct to represent the /etc/finna-pk/config.yml file that runs on the server that the user is SSHing into
 type ServerConfig struct {
 	EnvVars    map[string]string `yaml:"env_vars"`
 	DenyUsers  []string          `yaml:"deny_users"`

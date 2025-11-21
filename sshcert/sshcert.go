@@ -23,9 +23,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/verifier"
 	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/verifier"
 	"golang.org/x/crypto/ssh"
 )
 

@@ -6,15 +6,15 @@ Options:
 
   `--no-home-policy`
 
-  Disables configuration that allows opkssh to see policy files in user's       home directory (/home/&lt;username&gt;/auth_id). Greatly simplifies install.
+  Disables configuration that allows finna-pk to see policy files in user's       home directory (/home/&lt;username&gt;/auth_id). Greatly simplifies install.
 
   `--selinux-enable-squid`
 
-  Enables the Squid proxy ports in opkssh SELinux module. Used when system       has HTTPS_PROXY set to a Squid proxy
+  Enables the Squid proxy ports in finna-pk SELinux module. Used when system       has HTTPS_PROXY set to a Squid proxy
 
   `--selinux-enable-proxy`
 
-  Enables the HTTP Cache ports in opkssh SELinux module. Used when system       has set the HTTPS_PROXY to a general HTTP Proxy. Dynamicly configure ports       used with SELinux http_cache_port_t port type
+  Enables the HTTP Cache ports in finna-pk SELinux module. Used when system       has set the HTTPS_PROXY to a general HTTP Proxy. Dynamicly configure ports       used with SELinux http_cache_port_t port type
 
   `--no-sshd-restart`
 
@@ -42,18 +42,18 @@ Options:
 
 | Variable name | Default value | System env override |
 |---------------|---------------|---------------------|
-| **AUTH_CMD_USER** | `opksshuser` | OPKSSH_INSTALL_AUTH_CMD_USER |
-| **AUTH_CMD_GROUP** | `opksshuser` | OPKSSH_INSTALL_AUTH_CMD_GROUP |
-| **SUDOERS_PATH** | `/etc/sudoers.d/opkssh` | OPKSSH_INSTALL_SUDOERS_PATH |
-| **HOME_POLICY** | `true` | OPKSSH_INSTALL_HOME_POLICY |
-| **SELINUX_ENABLE_PROXY** | `false` | OPKSSH_INSTALL_SELINUX_ENABLE_PROXY |
-| **SELINUX_ENABLE_SQUID** | `false` | OPKSSH_INSTALL_SELINUX_ENABLE_SQUID |
-| **RESTART_SSH** | `true` | OPKSSH_INSTALL_RESTART_SSH |
-| **OVERWRITE_ACTIVE_CONFIG** | `false` | OPKSSH_INSTALL_OVERWRITE_ACTIVE_CONFIG |
-| **INSTALL_VERSION** | `latest` | OPKSSH_INSTALL_VERSION |
-| **INSTALL_DIR** | `/usr/local/bin` | OPKSSH_INSTALL_DIR |
-| **BINARY_NAME** | `opkssh` | OPKSSH_INSTALL_BINARY_NAME |
-| **GITHUB_REPO** | `openpubkey/opkssh` | OPKSSH_INSTALL_GITHUB_REPO |
+| **AUTH_CMD_USER** | `finna-pkuser` | FINNA-PK_INSTALL_AUTH_CMD_USER |
+| **AUTH_CMD_GROUP** | `finna-pkuser` | FINNA-PK_INSTALL_AUTH_CMD_GROUP |
+| **SUDOERS_PATH** | `/etc/sudoers.d/finna-pk` | FINNA-PK_INSTALL_SUDOERS_PATH |
+| **HOME_POLICY** | `true` | FINNA-PK_INSTALL_HOME_POLICY |
+| **SELINUX_ENABLE_PROXY** | `false` | FINNA-PK_INSTALL_SELINUX_ENABLE_PROXY |
+| **SELINUX_ENABLE_SQUID** | `false` | FINNA-PK_INSTALL_SELINUX_ENABLE_SQUID |
+| **RESTART_SSH** | `true` | FINNA-PK_INSTALL_RESTART_SSH |
+| **OVERWRITE_ACTIVE_CONFIG** | `false` | FINNA-PK_INSTALL_OVERWRITE_ACTIVE_CONFIG |
+| **INSTALL_VERSION** | `latest` | FINNA-PK_INSTALL_VERSION |
+| **INSTALL_DIR** | `/usr/local/bin` | FINNA-PK_INSTALL_DIR |
+| **BINARY_NAME** | `finna-pk` | FINNA-PK_INSTALL_BINARY_NAME |
+| **GITHUB_REPO** | `openpubkey/finna-pk` | FINNA-PK_INSTALL_GITHUB_REPO |
 
 # Script Function Documentation
 
@@ -198,16 +198,16 @@ Ensures that openSSH-Server is installed and configuration targets exists
 
 **Outputs:**
 -   Writes error if openSSH isn't installed with package manager
--   Writes error if it could verify target configuration files for opkssh
+-   Writes error if it could verify target configuration files for finna-pk
 
 
 **Returns:**
 -   0 if openSSH is installed with package manager and configuration files exists, 1 otherwise.
 
 
-## `ensure_opkssh_user_and_group`
+## `ensure_finna-pk_user_and_group`
 
-ensure_opkssh_user_and_group
+ensure_finna-pk_user_and_group
 Checks if the group and user used bu AuthorizedKeysCommand exists if not creates it
 
 **Arguments:**
@@ -223,9 +223,9 @@ Checks if the group and user used bu AuthorizedKeysCommand exists if not creates
 -   0 on success
 
 
-## `check_opkssh_version`
+## `check_finna-pk_version`
 
-check_opkssh_version
+check_finna-pk_version
 Checks if an earlier version that is not supported by this script is beeing installed
 If so, exit with error code and installation instructions
 
@@ -256,10 +256,10 @@ Parses CLI arguments and sets configuration flags.
 -   0 on success, 1 if help is in arguments
 
 
-## `install_opkssh_binary`
+## `install_finna-pk_binary`
 
-install_opkssh_binary
-Installs opkssh binary either from local file or downloads from repository
+install_finna-pk_binary
+Installs finna-pk binary either from local file or downloads from repository
 
 
 **Outputs:**
@@ -285,9 +285,9 @@ check_selinux
 -   0 if SELinux is disabled or if context is correctly
 
 
-## `configure_opkssh`
+## `configure_finna-pk`
 
-configure_opkssh
+configure_finna-pk
 Creates/checks the opskssh configuration
 
 **Arguments:**
@@ -305,7 +305,7 @@ Creates/checks the opskssh configuration
 ## `configure_openssh_server`
 
 configure_openssh_server
-Configure openSSH-server to use opkssh using AuthorizedKeysCommand
+Configure openSSH-server to use finna-pk using AuthorizedKeysCommand
 
 **Arguments:**
 -   $1 - Path to ssh root configuration directory (Optional, default /etc/ssh)
@@ -336,7 +336,7 @@ Checks if RESTART_SSH is true and restarts the openSSH server daemon if that is 
 ## `configure_sudo`
 
 configure_sudo
-Configures sudo for opkssh if HOME_POLICY is set to true
+Configures sudo for finna-pk if HOME_POLICY is set to true
 
 
 **Outputs:**
@@ -348,17 +348,17 @@ Configures sudo for opkssh if HOME_POLICY is set to true
 -   0
 
 
-## `log_opkssh_installation`
+## `log_finna-pk_installation`
 
-log_opkssh_installation
-Log the installation details to /var/log/opkssh.log to help with debugging
+log_finna-pk_installation
+Log the installation details to /var/log/finna-pk.log to help with debugging
 
 **Arguments:**
--   $1 - Path to opkssh log file (Optional, default /var/log/opkssh.log)
+-   $1 - Path to finna-pk log file (Optional, default /var/log/finna-pk.log)
 
 Output:
   Writes to stdout that installation is successful
-  Writes installation debug information to /var/log/opkssh.log
+  Writes installation debug information to /var/log/finna-pk.log
 
 
 **Returns:**
@@ -375,6 +375,6 @@ Running main function only if executed, not sourced
 
 
 **Returns:**
--   0 if opkssh installs successfully, 1 if installation failed
+-   0 if finna-pk installs successfully, 1 if installation failed
 
 

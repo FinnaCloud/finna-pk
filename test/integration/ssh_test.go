@@ -38,15 +38,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openpubkey/openpubkey/discover"
-	simpleoidc "github.com/openpubkey/openpubkey/oidc"
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/openpubkey/pktoken/clientinstance"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/opkssh/commands"
-	"github.com/openpubkey/opkssh/sshcert"
-	testprovider "github.com/openpubkey/opkssh/test/integration/provider"
-	"github.com/openpubkey/opkssh/test/integration/ssh_server"
+	//"github.com/FinnaCloud/finna-pk/discover"
+	//simpleoidc "github.com/FinnaCloud/finna-pk/oidc"
+	//"github.com/FinnaCloud/finna-pk/pktoken"
+	//"github.com/FinnaCloud/finna-pk/pktoken/clientinstance"
+	//"github.com/FinnaCloud/finna-pk/providers"
+	//"github.com/openpubkey/opkssh/commands"
+	//"github.com/openpubkey/opkssh/sshcert"
+	//testprovider "github.com/openpubkey/opkssh/test/integration/provider"
+	//"github.com/openpubkey/opkssh/test/integration/ssh_server"
 	"github.com/spf13/afero"
 
 	"github.com/melbahja/goph"
@@ -814,7 +814,7 @@ func CreatePolicyPlugin(t *testing.T, pluginConfig []byte, pluginCmd []byte, ser
 	})
 	require.NoError(t, err)
 
-	writePluginConfig := fmt.Sprintf(`sudo tee /etc/opk/policy.d/test-plugin.yml << 'EOF'
+	writePluginConfig := fmt.Sprintf(`sudo tee /etc/finna-pk/policy.d/test-plugin.yml << 'EOF'
 %s
 EOF`, string(pluginConfig))
 
@@ -822,10 +822,10 @@ EOF`, string(pluginConfig))
 	require.NoError(t, err, "writing policy plugin config")
 
 	// now fix perms/ownership
-	_, err = nonOpkSshClient.Run("sudo chmod 640 /etc/opk/policy.d/test-plugin.yml")
+	_, err = nonOpkSshClient.Run("sudo chmod 640 /etc/finna-pk/policy.d/test-plugin.yml")
 	require.NoError(t, err, "chmod policy plugin config")
 
-	_, err = nonOpkSshClient.Run("sudo chown root:opksshuser /etc/opk/policy.d/test-plugin.yml")
+	_, err = nonOpkSshClient.Run("sudo chown root:opksshuser /etc/finna-pk/policy.d/test-plugin.yml")
 	require.NoError(t, err, "chown policy plugin config")
 
 	writePluginCmd := fmt.Sprintf(`sudo tee /tmp/plugin-cmd.sh << 'EOF'

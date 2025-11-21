@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/openpubkey/opkssh/policy"
+	//"github.com/openpubkey/opkssh/policy"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -201,7 +201,7 @@ func TestLoad(t *testing.T) {
 			if tt.userPolicy != nil {
 				policyFile, err := tt.userPolicy.ToTable()
 				require.NoError(t, err)
-				expectedPath := path.Join(ValidUser.HomeDir, ".opk", "auth_id")
+				expectedPath := path.Join(ValidUser.HomeDir, ".finna-pk", "auth_id")
 				err = afero.WriteFile(mockFs, expectedPath, policyFile, 0600)
 				require.NoError(t, err)
 				expectedPaths = append(expectedPaths, expectedPath)

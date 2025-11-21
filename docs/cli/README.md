@@ -1,6 +1,6 @@
 # CLI Documentation
 
-You can start with the [opkssh documentation](opkssh.md).
+You can start with the [finna-pk documentation](finna-pk.md).
 
 ## Updates
 

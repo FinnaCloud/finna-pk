@@ -25,10 +25,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/util"
 	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/openpubkey/openpubkey/client"
-	"github.com/openpubkey/openpubkey/providers"
-	"github.com/openpubkey/openpubkey/util"
 	"github.com/openpubkey/opkssh/policy/files"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
@@ -413,7 +413,7 @@ func TestPluginPanics(t *testing.T) {
 	result := &PluginResult{
 		Allowed:      true,
 		PolicyOutput: "denied",
-		Path:         "/etc/opk/plugin.yml",
+		Path:         "/etc/finna-pk/plugin.yml",
 	}
 	results := PluginResults{result}
 

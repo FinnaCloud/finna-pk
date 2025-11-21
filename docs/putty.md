@@ -1,17 +1,17 @@
-# Using PuTTY with OPKSSH
+# Using PuTTY with FINNA-PK
 
-OPKSSH supports making SSH connections with [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/).
-As OPKSSH requires SSH certificate support and [PuTTY only added SSH certificate support in version 0.78 in the year 2022](https://www.chiark.greenend.org.uk/~sgtatham/putty/changes.html), ensure your version of PuTTY is at least 0.78 or greater.
+FINNA-PK supports making SSH connections with [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/).
+As FINNA-PK requires SSH certificate support and [PuTTY only added SSH certificate support in version 0.78 in the year 2022](https://www.chiark.greenend.org.uk/~sgtatham/putty/changes.html), ensure your version of PuTTY is at least 0.78 or greater.
 
 ## Should you use PuTTY?
 
 Windows 10 and after natively support SSH and provide a much better user experience than PuTTY.
 We recommend against using PuTTY if you are using a recent version of Windows and just using the built-in window SSH command.
 
-To use native SSH windows with opkssh simply open a terminal or command.com and type:
+To use native SSH windows with finna-pk simply open a terminal or command.com and type:
 
 ```powershell
-.\opkssh.exe login
+.\finna-pk.exe login
 ssh user@hostname
 ```
 
@@ -27,21 +27,21 @@ In the following steps we provide a walkthrough on how to import the regular SSH
 
 **Important: make sure you are using the latest version of Putty, earlier versions of Putty don't support this.**
 
-### Step 1: Generate your OPKSSH ssh key
+### Step 1: Generate your FINNA-PK ssh key
 
-Generate your OPKSSH ssh key by running `opkssh.exe login`.
-The output of this command will tell you the location opkssh wrote the key on your machine. Make note of this, we will need it in the next step. Typically these files are written to:
+Generate your FINNA-PK ssh key by running `finna-pk.exe login`.
+The output of this command will tell you the location finna-pk wrote the key on your machine. Make note of this, we will need it in the next step. Typically these files are written to:
 
 - `C:\Users\{USERNAME}\.ssh\id_ecdsa-cert.pub` for the SSH certificate
 - `C:\Users\{USERNAME}\.ssh\id_ecdsa` for the SSH private key
 
-![Shows terminal output of running opkssh and location of ssh public key and ssh private key](https://github.com/user-attachments/assets/c1101d5e-8e6a-4a7e-82c8-d139b911efb6)
+![Shows terminal output of running finna-pk and location of ssh public key and ssh private key](https://github.com/user-attachments/assets/c1101d5e-8e6a-4a7e-82c8-d139b911efb6)
 
 ### Step 2: Use PuTTYgen to import the certificate and private key
 
 Open PuTTYgen. PuTTyGen comes automatically with your PuTTY, so if you have PuTTY installed you have PuTTYgen installed.
 
-In PuTTYgen click "Conversions --> Import Key" in the taskbar and then select the SSH private key `opkssh login` generated in step 1.
+In PuTTYgen click "Conversions --> Import Key" in the taskbar and then select the SSH private key `finna-pk login` generated in step 1.
 By default this should be `C:\Users\{USERNAME}\.ssh\id_ecdsa`.
 You should know see the PuTTYgen has imported your private key because PuTTYgen will look something like:
 
@@ -69,10 +69,10 @@ Add the certificate (public key) and private key you imported and saved.
 
 ![Image](https://github.com/user-attachments/assets/be1169b1-2afb-45bb-b5fa-b7cedecb77b0)
 
-Now you can return to Session and click open to SSH using the OPKSSH generated certificate and private key.
+Now you can return to Session and click open to SSH using the FINNA-PK generated certificate and private key.
 
 ![Image](https://github.com/user-attachments/assets/4b66ce4f-95f5-464c-8bfc-1fa8be32535e)
 
 You can save this connection profile so you don't have to edit these settings each time.
 
-By default opkssh keys expire every 24 hours and so each day you need to generate a new one and then reimport it into PuTTY.
+By default finna-pk keys expire every 24 hours and so each day you need to generate a new one and then reimport it into PuTTY.

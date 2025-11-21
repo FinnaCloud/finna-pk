@@ -26,13 +26,13 @@ import (
 )
 
 // ModeSystemPerms is the expected permission bits that should be set for opkssh
-// system policy files (`/etc/opk/auth_id`, `/etc/opk/providers`). This mode means
+// system policy files (`/etc/finna-pk/auth_id`, `/etc/finna-pk/providers`). This mode means
 // that only the owner of the file can write/read to the file, but the group which
 // should be opksshuser can read the file.
 const ModeSystemPerms = fs.FileMode(0640)
 
 // ModeHomePerms is the expected permission bits that should be set for opkssh
-// user home policy files `~/.opk/auth_id`.
+// user home policy files `~/.finna-pk/auth_id`.
 const ModeHomePerms = fs.FileMode(0600)
 
 // PermsChecker contains methods to check the ownership, group

@@ -1,569 +1,177 @@
-# opkssh (OpenPubkey SSH)
+# finna-pk
 
-[![Go Coverage](https://github.com/openpubkey/opkssh/wiki/coverage.svg)](https://raw.githack.com/wiki/openpubkey/opkssh/coverage.html)
+**Repository:** [https://github.com/FinnaCloud/finna-pk](https://github.com/FinnaCloud/finna-pk)
 
-**opkssh** is a tool which enables ssh to be used with OpenID Connect allowing SSH access to be managed via identities like `alice@example.com` instead of long-lived SSH keys.
-It does not replace SSH, but instead generates SSH public keys containing PK Tokens and configures sshd to verify them. These PK Tokens contain standard [OpenID Connect ID Tokens](https://openid.net/specs/openid-connect-core-1_0.html). This protocol builds on the [OpenPubkey](https://github.com/openpubkey/openpubkey/blob/main/README.md) which adds user public keys to OpenID Connect without breaking compatibility with existing OpenID Provider.
+> **Note:** This is a fork of [openpubkey/finna-pk](https://github.com/openpubkey/finna-pk), customized to fit our specific use case. The original project is [OpenPubkey](https://github.com/openpubkey/openpubkey), a Linux Foundation project.
 
-Currently opkssh is compatible with Google, Microsoft/Azure, Gitlab, hello.dev, and Authelia OpenID Providers (OP). See below for the entire list. If you have a gmail, microsoft or a gitlab account you can ssh with that account.
+## Overview
 
-To ssh with opkssh you first need to download the opkssh binary and then run:
+finna-pk is a fork of OpenPubkey SSH (finna-pk) that provides SSH authentication using OpenID Connect (OIDC) providers. This fork has been customized to meet our specific requirements while maintaining compatibility with the OpenPubkey protocol.
 
-```bash
-opkssh login
-```
+OpenPubkey is a protocol for leveraging OpenID Providers (OPs) to bind identities to public keys. It adds user- or workload-generated public keys to [OpenID Connect (OIDC)](https://openid.net/developers/how-connect-works/), enabling identities to sign messages or artifacts under their OIDC identity.
 
-This opens a browser window where you can authenticate to your OpenID Provider. This will generate an SSH key in `~/.ssh/id_ecdsa` which contains your OpenID Connect identity.
-Then you can ssh under this identity to any ssh server which is configured to use opkssh to authenticate users using their OpenID Connect identities.
+We represent this binding as a PK Token. This token proves control of the OIDC identity and the associated private key at a specific time, as long as a verifier trusts the OP. Put another way, the PK Token provides the same assurances as a certificate issued by a Certificate Authority (CA) but critically, does not require adding a CA. Instead, the OP fulfills the role of the CA. This token can be distributed alongside signatures in the same way as a certificate.
 
-```bash
-ssh user@example.com
-```
+OpenPubkey does not add any new trusted parties beyond what is required for OpenID Connect. It is fully compatible with existing OpenID Providers (Google, Azure/Microsoft, Okta, OneLogin, Keycloak) without any changes to the OpenID Provider.
 
-### OpenPubkey Mailing List
-For updates and announcements join the [OpenPubkey mailing list.](https://groups.google.com/g/openpubkey)
+## Why This Fork?
+
+This fork of finna-pk has been customized to fit our specific use case and requirements. While we maintain compatibility with the core OpenPubkey protocol, we've made modifications to better suit our needs.
 
 ## Getting Started
 
-To ssh with opkssh, Alice first needs to install opkssh using homebrew or manually downloading the binary.
+Let's walk through a simple message signing example. For conciseness we omit the error handling code. The full code for this example can be found in [./examples/simple/example.go](./examples/simple/example.go).
 
-### Homebrew Install (macOS)
+We start by configuring the OP (OpenID Provider) our client and verifier will use. In this example we use Google as our OP.
 
-To install with homebrew run:
-
-```bash
-brew tap openpubkey/opkssh
-brew install opkssh
+```golang
+opOptions := providers.GetDefaultGoogleOpOptions()
+opOptions.GQSign = signGQ
+op := providers.NewGoogleOpWithOptions(opOptions)
 ```
 
-### Winget Install (Windows)
+Next we create the OpenPubkey client and call `opkClient.Auth`:
 
-To install with winget run:
-
-```powershell
-winget install openpubkey.opkssh
+```golang
+opkClient, err := client.New(op)
+pkt, err := opkClient.Auth(context.Background())
 ```
 
-### Chocolatey Install (Windows)
+The function `opkClient.Auth` opens a browser window to the OP, Google in this case, which then prompts the user to authenticate their identity. If the user authenticates successfully the client will generate and return a PK Token, `pkt`.
 
-To install with [Chocolatey](https://chocolatey.org/install) run:
+The PK Token, `pkt`, along with the client's signing key can then be used to sign messages:
 
-```powershell
-choco install opkssh -y
+```golang
+msg := []byte("All is discovered - flee at once")
+signedMsg, err := pkt.NewSignedMessage(msg, opkClient.GetSigner())
 ```
 
-### Nix Install
+To verify a signed message, we first verify that the PK Token `pkt` is issued by the OP (Google). Then we use the PK Token to verify the signed message.
 
-Use the [opkssh nixpkg](https://search.nixos.org/packages?channel=unstable&show=opkssh&query=opkssh) as normal, or test it via:
-
-```bash
-nix-shell -p opkssh
+```golang
+pktVerifier, err := verifier.New(provider)
+err = pktVerifier.VerifyPKToken(context.Background(), pkt)
+msg, err := pkt.VerifySignedMessage(signedMsg)
 ```
 
-### Manual Install (Windows, Linux, macOS)
+To run this example type: `go run .\examples\simple\example.go`.
 
-To install manually, download the opkssh binary and run it:
+This will open a browser window to Google. If you authenticate to Google successfully, you should see: `Verification successful: anon.author.aardvark@gmail.com (https://accounts.google.com) signed the message 'All is discovered - flee at once'` where `anon.author.aardvark@gmail.com` is your gmail address.
 
-|           | Download URL |
-|-----------|--------------|
-|🐧 Linux (x86_64)   | [github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-amd64](https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-amd64) |
-|🐧 Linux (ARM64/aarch64)    | [github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-arm64](https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-arm64) |
-|🍎 macOS (x86_64)             | [github.com/openpubkey/opkssh/releases/latest/download/opkssh-osx-amd64](https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-osx-amd64) |
-|🍎 macOS (ARM64/aarch64)             | [github.com/openpubkey/opkssh/releases/latest/download/opkssh-osx-arm64](https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-osx-arm64) |
-| ⊞ Win              | [github.com/openpubkey/opkssh/releases/latest/download/opkssh-windows-amd64.exe](https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-windows-amd64.exe) |
+## How Does OpenPubkey Work?
 
-To install on Windows run:
+OpenPubkey supports both workload identities and user identities. Let's look at how this works for users and then show how to extend OpenPubkey to workloads.
 
-```powershell
-curl https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-windows-amd64.exe -o opkssh.exe
+### OpenPubkey and User Identities
+
+In OpenID Connect (OIDC) users authenticate to an OP (OpenID Provider), and the OP grants the user an ID Token. These ID Tokens are signed by the OP and contain claims made by the OP about the user such as the user's email address. Important to OpenPubkey is the `nonce` claim in the ID Token.
+
+The `nonce` claim in the ID Token is a random value sent to the OP by the user's client during authentication with the OP. OpenPubkey follows the OpenID Connect authentication protocol with the OP, but it transmits a `nonce` value set to the cryptographic hash of both the user's public key and a random value so that the `nonce` is still cryptographically random, but any party that speaks OpenPubkey can check that ID Token contains the user's public key. From the perspective of the OP, the `nonce` looks just like a random value.
+
+Let's look at an example where a user, Alice, leverages OpenPubkey to get her OpenID Provider, `google.com`, to bind her OIDC identity, `alice@acme.co`, to her public key `alice-pubkey`. To do this, Alice invokes her OpenPubkey client.
+
+1. Alice's OpenPubkey client generates a fresh key pair for Alice, (`alice-pubkey`, `alice-signkey`), and a random value `rz`. The client then computes the `nonce=crypto.SHA3_256(upk=alice-pubkey, alg=ES256, rz=crypto.Rand())`. The value `alg` is set to the algorithm of Alice's key pair.
+2. Alice's OpenPubkey client then initiates OIDC authentication flow with the OP, `google.com`, and sends the `nonce` to the OP.
+3. The OP requests that Alice consents to issuing an ID Token and provides credentials (i.e., username and password) to authenticate to her OP (`Google`).
+4. If Alice successfully authenticates, the OP builds an ID Token containing claims about Alice. Critically, this ID Token contains the `nonce` claim generated by Alice's client to commit to Alice's public key. The OP then signs this ID Token under its signing key and sends the ID Token to Alice.
+
+The ID Token is a JSON Web Signature (JWS) and follows the structure shown below:
+
+```
+payload: {
+  "iss": "https://accounts.google.com",
+  "aud": "878305696756-6maur39hl2psmk23imilg8af815ih9oi.apps.googleusercontent.com",
+  "sub": "123456789010",
+  "email": "alice@acme.co",
+  "nonce": 'crypto.SHA3_256(upk=alice-pubkey, alg=ES256, rz=crypto.Rand(), typ="CIC")',
+  "name": "Alice Example",
+  ...
+} 
+signatures: [
+  {"protected": {"alg": "RS256", "kid": "1234...", "typ": "JWT"},
+  "signature": SIGN(google-signkey, (payload, signatures[0].protected))`
+  },
+]
 ```
 
-To install on macOS run:
+At this point, Alice has an ID Token, signed by `google.com` (the OP). Anyone can download the OP's (`google.com`) public keys from `google.com`'s well-known JSON Web Key Set (JWKS) URI ([www.googleapis.com/oauth2/v3/certs]([https://www.googleapis.com/oauth2/v3/cert](https://www.googleapis.com/oauth2/v3/certs))) and verify that this ID Token committing to Alice's public key was actually signed by `google.com`. If Alice reveals the values of `alice-pubkey`, `alg`, and `rz`, anyone can verify that the `nonce` in the ID Token is the hash of  `upk=alice-pubkey, alg=ES256, rz=crypto.Rand()`. Thus, Alice now has a ID Token signed by Google that cryptography binding her identity, `alice@acme.co`, to her public key, `alice-pubkey`.
 
-```bash
-curl -L https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-osx-amd64 -o opkssh; chmod +x opkssh
+### PK Tokens
+
+A PK Token is simply an extension of the ID Token that bundles together the ID Token with values committed to in the ID Token `nonce`. Because ID Tokens are JSON Web Signatures (JWS) and a JWS can have more than one signature, we extend the ID Token into a PK Token by appending a second signature/protected header.
+
+Alice simply sets the values she committed to in the `nonce` as a JWS protected header and signs the ID Token payload and this protected header under her signing key, `alice-signkey`. This signature acts as cryptographic proof that the user knows the secret signing key corresponding to the public key.
+
+Notice the additional signature entry in the PK Token example below (as compared to the ID Token example above):
+
 ```
-
-To install on linux, run:
-
-```bash
-curl -L https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-amd64 -o opkssh; chmod +x opkssh
-```
-
-or for ARM
-
-```bash
-curl -L https://github.com/openpubkey/opkssh/releases/latest/download/opkssh-linux-arm64 -o opkssh; chmod +x opkssh
-```
-
-### SSHing with opkssh
-
-After downloading opkssh run:
-
-```cmd
-opkssh login
-```
-
-This opens a browser window to select which OpenID Provider you want to authenticate against.
-After successfully authenticating opkssh generates an SSH public key in `~/.ssh/id_ecdsa` which contains your PK Token.
-By default this ssh key expires after 24 hours and you must run `opkssh login` to generate a new ssh key.
-
-Since your PK Token has been saved as an SSH key you can SSH as normal:
-
-```bash
-ssh root@example.com
-```
-
-This works because SSH sends the public key written by opkssh in `~/.ssh/id_ecdsa` to the server and sshd running on the server will send the public key to the opkssh command to verify. This also works for other protocols that build on ssh like [sftp](https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol) or ssh tunnels.
-
-```bash
-sftp root@example.com
-```
-
-### Custom key name
-
-<details>
-<summary>Instructions</summary>
-
-#### SSH command
-
-Tell opkssh to store the name the key-pair `opkssh_server_group1`
-
-```cmd
-opkssh login -i opkssh_server_group1
-```
-
-Tell ssh to use the generated key pair.
-
-```bash
-ssh -o "IdentitiesOnly=yes" -i ~/.ssh/opkssh_server_group1 root@example.com
-```
-
-We recommend specifying `-o "IdentitiesOnly=yes"` as it tells ssh to only use the provided key. Otherwise ssh will cycle through other keys in `~/.ssh` first and may not get to the specified ones. Servers are configured to only allow 6 attempts by default the config key is `MaxAuthTries 6`.
-
-</details>
-
-### Installing on a Server
-
-To configure a linux server to use opkssh simply run (with root level privileges):
-
-```bash
-wget -qO- "https://raw.githubusercontent.com/openpubkey/opkssh/main/scripts/install-linux.sh" | sudo bash
-```
-
-This downloads the opkssh binary, installs it as `/usr/local/bin/opkssh`, and then configures ssh to use opkssh as an additional authentication mechanism.
-
-To allow a user, `alice@gmail.com`, to ssh to your server as `root`, run:
-
-```bash
-sudo opkssh add root alice@gmail.com google
-```
-
-To allow a group, `ssh-users`, to ssh to your server as `root`, run:
-
-```bash
-sudo opkssh add root oidc:groups:ssh-users google
-```
-
-We can also enforce policy on custom claims.
-For instance to require that root access is only granted to users whose ID Token has a claim `https://acme.com/groups` with the value `ssh-users` run:
-
-```bash
-sudo opkssh add root oidc:\"https://acme.com/groups\":ssh-users google
-```
-
-which will add that line to your OPKSSH policy file.
-
-## How it works
-
-We use two features of SSH to make this work.
-First we leverage the fact that SSH public keys can be SSH certificates and SSH Certificates support arbitrary extensions.
-This allows us to smuggle your PK Token, which includes your ID Token, into the SSH authentication protocol via an extension field of the SSH certificate.
-Second, we use the `AuthorizedKeysCommand` configuration option in `sshd_config` (see [sshd_config manpage](https://man.openbsd.org/sshd_config.5#AuthorizedKeysCommand)) so that the SSH server will send the SSH certificate to an installed program that knows how to verify PK Tokens.
-
-## What is supported
-
-### Client support
-
-| OS        | Supported | Tested  | Version Tested          |
-| --------- | --------  | ------- | ----------------------- |
-| Linux     | ✅        | ✅      |  Ubuntu 24.04.1 LTS     |
-| macOS     | ✅        | ✅      |  macOS 15.3.2 (Sequoia) |
-| Windows11 | ✅        | ✅      |  Windows 11             |
-
-### Server support
-
-| OS               | Supported | Tested | Version Tested         | Possible Future Support |
-| ---------------- | --------  | ------ | ---------------------- | ----------------------- |
-| Linux            | ✅        | ✅     |  Ubuntu 24.04.1 LTS    | -                       |
-| Linux            | ✅        | ✅     |  Centos 9              | -                       |
-| Linux            | ✅        | ✅     |  Arch Linux            | -                       |
-| Linux            | ✅        | ✅     |  openSUSE Tumbleweed   | -                       |
-| macOS            | ❌        | ❌     |  -                     | Likely                  |
-| Windows11        | ❌        | ❌     |  -                     | Likely                  |
-
-## Server Configuration
-
-All opkssh configuration files are space delimited and live on the server.
-Below we discuss our basic policy system, to read how to configure complex policies rules see our [documentation on our policy plugin system](docs/policyplugins.md). Using the policy plugin system you can enforce any policy rule that be computed on a [Turing Machine](https://en.wikipedia.org/wiki/Turing_machine).
-
-### `/etc/opk/providers`
-
-`/etc/opk/providers` contains a list of allowed OPs (OpenID Providers), a.k.a. IDPs.
-This file functions as an access control list that enables admins to determine the OpenID Providers and Client IDs they wish to rely on.
-
-- Column 1: Issuer URI of the OP
-- Column 2: Client-ID, the audience claim in the ID Token
-- Column 3: Expiration policy, options are:
-  - `12h` - user's ssh public key expires after 12 hours,
-  - `24h` - user's ssh public key expires after 24 hours,
-  - `48h` - user's ssh public key expires after 48 hours,
-  - `1week` - user's ssh public key expires after 1 week,
-  - `oidc` - user's ssh public key expires when the ID Token expires
-  - `oidc-refreshed` - user's ssh public key expires when their refreshed ID Token expires.
-
-By default we use `24h` as it requires that the user authenticate to their OP once a day. Most OPs expire ID Tokens every one to two hours, so if `oidc` the user will have to sign multiple times a day. `oidc-refreshed` is supported but complex and not currently recommended unless you know what you are doing.
-
-The default values for `/etc/opk/providers` are:
-
-```bash
-# Issuer Client-ID expiration-policy
-https://accounts.google.com 206584157355-7cbe4s640tvm7naoludob4ut1emii7sf.apps.googleusercontent.com 24h
-https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0 096ce0a3-5e72-4da8-9c86-12924b294a01 24h
-```
-
-`/etc/opk/providers` requires the following permissions (by default we create all configuration files with the correct permissions):
-
-```bash
-sudo chown root:opksshuser /etc/opk/providers
-sudo chmod 640 /etc/opk/providers
-```
-
-### `/etc/opk/auth_id`
-
-`/etc/opk/auth_id` is the global authorized identities file.
-This is a server wide file where policies can be configured to determine which identities can assume what linux user accounts.
-Linux user accounts are typically referred to in SSH as *principals* and we continue the use of this terminology.
-
-- Column 1: The principal, i.e., the account the user wants to assume
-- Column 2: Email address or subject ID of the user (choose one)
-  - Email - the email of the identity
-  - Subject ID - an unique ID for the user set by the OP. This is the `sub` claim in the ID Token.
-  - Group - the name of the group that the user is part of. This uses the `groups` claim which is presumed to
-    be an array. The group identifier uses a structured identifier. I.e. `oidc:groups:{groupId}`. Replace the `groupId`
-    with the id of your group. If your group contains a colon, escape it `oidc:"https://acme.com/groups":{groupId}`.
-- Column 3: Issuer URI
-
-```bash
-# email/sub principal issuer
-alice alice@example.com https://accounts.google.com
-guest alice@example.com https://accounts.google.com
-root alice@example.com https://accounts.google.com
-dev bob@microsoft.com https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0
-
-# Group identifier
-dev oidc:groups:developer https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0
-dev oidc:"https://acme.com/groups":developer https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0
-```
-
-To add new rule run:
-
-`sudo opkssh add <user> <email/sub/group> <issuer>`
-
-These `auth_id` files can be edited by hand or you can use the add command to add new policies.
-For convenience you can use the shorthand `google` or `azure` rather than specifying the entire issuer.
-This is especially useful in the case of azure where the issuer contains a long and hard to remember random string. For instance:
-
-`sudo opkssh add dev bob@microsoft.com azure`
-
-`/etc/opk/auth_id` requires the following permissions (by default we create all configuration files with the correct permissions):
-
-```bash
-sudo chown root:opksshuser /etc/opk/auth_id
-sudo chmod 640 /etc/opk/auth_id
-```
-
-### `~/.opk/auth_id`
-
-This is a local version of the auth_id file.
-It lives in the user's home directory (`/home/{USER}/.opk/auth_id`) and allows users to add or remove authorized identities without requiring root level permissions.
-
-It can only be used for user/principal whose home directory it lives in.
-That is, if it is in `/home/alice/.opk/auth_id` it can only specify who can assume the principal `alice` on the server.
-
-```bash
-# email/sub principal issuer
-alice alice@example.com https://accounts.google.com
-
-# Group identifier
-dev oidc:groups:developer https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0
-```
-
-It requires the following permissions:
-
-```bash
-chown {USER}:{USER} /home/{USER}/.opk/auth_id
-chmod 600 /home/{USER}/.opk/auth_id
-```
-
-### AuthorizedKeysCommandUser
-
-We use a low privilege user for the SSH AuthorizedKeysCommandUser.
-Our install script creates this user and group automatically by running:
-
-```bash
-sudo groupadd --system opksshuser
-sudo useradd -r -M -s /sbin/nologin -g opksshuser opksshuser
-```
-
-We then add the following lines to `/etc/ssh/sshd_config`
-
-```bash
-AuthorizedKeysCommand /usr/local/bin/opkssh verify %u %k %t
-AuthorizedKeysCommandUser opksshuser
-```
-
-## Server Configuration (NixOS)
-
-On NixOS, you can configure the SSH daemon by **including** the following lines to your config:
-
-```nix
-{ ... }:
-
-{
-  services.opkssh = {
-    enable = true;
-
-    providers = {
-      google = {
-        issuer = "https://accounts.google.com";
-        clientId =
-          "206584157355-7cbe4s640tvm7naoludob4ut1emii7sf.apps.googleusercontent.com";
-        lifetime = "24h";
-      };
-    };
-
-    authorizations = [
-      {
-        user = "YOUR_USERNAME";
-        principal = "YOUR_GMAIL";
-        issuer = "https://accounts.google.com";
-      }
-    ];
-  };
+"payload": {
+  "iss": "https://accounts.google.com",
+  "aud": "878305696756-6maur39hl2psmk23imilg8af815ih9oi.apps.googleusercontent.com",
+  "sub": "123456789010",
+  "email": "alice@acme.co",
+  "nonce": <crypto.SHA3_256(upk=alice-pubkey, alg=ES256, rz=crypto.Rand(), typ="CIC")>,
+  "name": "Alice Example",
+  ...
 }
+"signatures": [
+  {"protected": {"alg": "RS256", "kid": "1234...", "typ": "JWT"},
+  "signature": <SIGN(google-signkey, (payload, signatures[0].protected))>
+  },
+  {"protected": {"upk": alice-pubkey, "alg": "EC256", "rz": crypto.Rand(), "typ": "CIC"},
+  "signature": <SIGN(alice-signkey, (payload, signatures[1].protected))>
+  },
+]
 ```
 
-See [search.nixos.org](https://search.nixos.org/options?channel=unstable&query=services.opkssh) for
-all available configuration options.
+The PK Token can be presented to an OpenPubkey verifier, which uses OIDC to obtain the OP's public key and verify the OP's signature in the ID Token. It then use the values in the protected header to extract the user's public key.
 
-## Custom OpenID Providers (Authentik, Authelia, Keycloak, Zitadel...)
+### OpenPubkey and Workload Identities
 
-To log in using a custom OpenID Provider, run:
+Just like OpenID Connect, OpenPubkey supports both user identities and workload identities.
 
-```bash
-opkssh login --provider="<issuer>,<client_id>"
-```
+The workload identity setting is very similar to the user identity setting with one major difference. Workload OpenID Providers, such as `github.com`, do not include a `nonce` claim in the ID Token. Unlike user identity providers, they allow the workload to specify an `aud`(audience) claim. Thus workload identity functions in a similar fashion as user identity but rather than commit to the public key in the `nonce`, we use the `aud` claim instead.
 
-or in the rare case that a client secret is required by the OpenID Provider:
+### GQ Signatures To Prevent Replay Attacks
 
-```bash
-opkssh login --provider="<issuer>,<client_id>,<client_secret>,<scopes>"
-```
+Although not present in the original [OpenPubkey paper](https://eprint.iacr.org/2023/296), GQ signatures have now been integrated so that the OpenID Provider's (OP) signature can be stripped from the ID Token and a proof of the OP's signature published in its place. This prevents the ID Token within the PK Token from being used against any OIDC resource providers as the original signature has been removed without compromising any of the assurances that the original OP's signature provided.
 
-where issuer, client_id and client_secret correspond to the issuer client ID and client secret of the custom OpenID Provider.
+We follow the approach specified in the following paper: [Reducing Trust in Automated Certificate Authorities via Proofs-of-Authentication](https://arxiv.org/abs/2307.08201).
 
-For example if the issuer is `https://authentik.local/application/o/opkssh/` and the client ID was `ClientID123`:
+For user-identity scenarios where the PK Token is not made public, GQ signatures are not required. GQ Signatures are required for all current workload-identity use cases.
 
-```bash
-opkssh login --provider="https://authentik.local/application/o/opkssh/,ClientID123"
-```
+## How To Use finna-pk
 
-to specify scopes
+finna-pk is driven by its use cases. You can find all available use cases in the [examples folder](./examples/).
 
-```bash
-opkssh login --provider="https://authentik.local/application/o/opkssh/,ClientID123,,openid profile email groups"
-```
+## How To Develop With finna-pk
 
-You can use this shortcut which will use a provider alias to find the provider.
+You can check out the [examples folder](./examples/) for more information about finna-pk's different use cases.
 
-```bash
-opkssh login authentik
-```
+## Contributing
 
-This alias to provider mapping be can configured using the OPKSSH_PROVIDERS environment variables.
+### File An Issue
 
-### Client Config File
+For feature requests, bug reports, technical questions and requests, please open an issue. We ask that you review [existing issues](https://github.com/FinnaCloud/finna-pk/issues) before filing a new one to ensure your issue has not already been addressed.
 
-Rather than type in the provider each time, you can create a client config file by running `opkssh login --create-config` at
-`C:\Users\{USER}\.opk\config.yml` on windows and `~/.opk/config.yml` on linux.
-You can then edit this config file to add your provider.
+If you have found what you believe to be a security vulnerability, *DO NOT file an issue*. Instead, please follow our [security disclosure policy](./SECURITY.md).
 
-<details>
-<summary>config.yml</summary>
+### Contribute
 
-You can delete any providers you don't plan on using.
-If you have a provider you want to open by default, change `default_provider` to the name of your alias of your custom provider.
+To learn more about how to contribute, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-```yaml
----
-default_provider: webchooser
+### Report A Security Issue
 
-providers:
-  - alias: google
-    issuer: https://accounts.google.com
-    client_id: 206584157355-7cbe4s640tvm7naoludob4ut1emii7sf.apps.googleusercontent.com
-    client_secret: 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
-    scopes: openid email profile
-    access_type: offline
-    prompt: consent
-    redirect_uris:
-      - http://localhost:3000/login-callback
-      - http://localhost:10001/login-callback
-      - http://localhost:11110/login-callback
+To report a security issue, please follow our [security disclosure policy](./SECURITY.md).
 
-  - alias: azure microsoft
-    issuer: https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0
-    client_id: 096ce0a3-5e72-4da8-9c86-12924b294a01
-    scopes: openid profile email offline_access
-    access_type: offline
-    prompt: consent
-    redirect_uris:
-      - http://localhost:3000/login-callback
-      - http://localhost:10001/login-callback
-      - http://localhost:11110/login-callback
+## License
 
-  - alias: gitlab
-    issuer: https://gitlab.com
-    client_id: 8d8b7024572c7fd501f64374dec6bba37096783dfcd792b3988104be08cb6923
-    scopes: openid email
-    access_type: offline
-    prompt: consent
-    redirect_uris:
-      - http://localhost:3000/login-callback
-      - http://localhost:10001/login-callback
-      - http://localhost:11110/login-callback
+This project is licensed under the Apache License 2.0. See the [LICENSE](./LICENSE) file for details.
 
-  - alias: hello
-    issuer: https://issuer.hello.coop
-    client_id: app_xejobTKEsDNSRd5vofKB2iay_2rN
-    scopes: openid email
-    access_type: offline
-    prompt: consent
-    redirect_uris:
-      - http://localhost:3000/login-callback
-      - http://localhost:10001/login-callback
-      - http://localhost:11110/login-callback
-```
+## Acknowledgments
 
-</details>
+This project is a fork of [openpubkey/opkssh](https://github.com/openpubkey/opkssh), which is based on the [OpenPubkey](https://github.com/openpubkey/openpubkey) protocol. OpenPubkey is a Linux Foundation project.
 
-### Environment Variables
+## FAQ
 
-Instead of using the `opkssh login --provider` flag you can also configure the providers to use with environment variables.
-
-The OPKSSH_PROVIDERS variable follow the standard format with `;` delimiting each provider and `,` delimiting fields with a provider for instance:
-`{alias},{issuer},{client_id},{client_secret},{scope};{alias},{issuer},{client_id},{client_secret},{scope}...`
-
-You can set them in your [`.bashrc` file](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) so you don't have to type custom settings each time you run `opk login`.
-
-```bash
-export OPKSSH_DEFAULT=WEBCHOOSER
-export OPKSSH_PROVIDERS=google,https://accounts.google.com,206584157355-7cbe4s640tvm7naoludob4ut1emii7sf.apps.googleusercontent.com,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;microsoft,https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0,096ce0a3-5e72-4da8-9c86-12924b294a01;gitlab,https://gitlab.com,8d8b7024572c7fd501f64374dec6bba37096783dfcd792b3988104be08cb6923
-export OPKSSH_PROVIDERS=$OPKSSH_PROVIDERS;authentik,https://authentik.io/application/o/opkssh/,client_id,,openid profile email
-```
-
-The OPKSSH_DEFAULT can be set to one of the provider's alias to set the default provider to use when running `opkssh login`.
-WEBCHOOSER will open a browser window to select the provider.
-
-### Redirect URIs
-
-Currently opkssh supports the following redirect URIs. Make sure that the correct redirectURIs have been added at your OpenID Provider:
-
-```
-http://localhost:3000/login-callback
-http://localhost:10001/login-callback
-http://localhost:11110/login-callback
-```
-
-### Security Note: Create a new Client ID for opkssh
-
-Do not reuse a client ID between opkssh and other OpenID Connect services.
-If the same client ID is used for opkssh as another OpenID Connect authentication service, then an SSH server could replay the ID Token sent in an opkssh SSH key to authenticate to that service.
-Such replay attacks can be ruled out by simply using a new client ID with opkssh.
-
-Note that this requirement of using different client IDs for different audiences and uses is not unique to opkssh and is a best practice in OpenID Connect.
-
-### Provider Server Configuration
-
-In the `/etc/opk/providers` file, add the OpenID Provider as you would any OpenID Provider. For example:
-
-```bash
-https://authentik.local/application/o/opkssh/ ClientID123 24h
-```
-
-Then add identities to the policy to allow those identities SSH to the server:
-
-```bash
-opkssh add root alice@example.com https://authentik.local/application/o/opkssh/
-```
-
-### Tested
-
-| OpenID Provider                           | Tested | Notes                                                                                                       |
-|-------------------------------------------|--------|-------------------------------------------------------------------------------------------------------------|
-| [Authelia](https://www.authelia.com/)     | ✅      | [Authelia Integration Guide](https://www.authelia.com/integration/openid-connect/opkssh/)                   |
-| [Authentik](https://goauthentik.io/)      | ✅      | Do not add a certificate in the encryption section of the provider                                          |
-| [Azure](https://www.azure.com/)           | ✅      | [Entra ID (Azure) Integration Guide](docs/providers/azure.md)
-| [Gitlab Self-hosted](https://gitlab.com/) | ✅      | [Configuration guide](docs/gitlab-selfhosted.md)                                                            |
-| [Kanidm](https://kanidm.com/)             | ✅      | [Kanidm Integration Guide](https://kanidm.github.io/kanidm/master/integrations/oauth2/examples.html#opkssh) |
-| [PocketID](https://pocket-id.org/)        | ✅      | Create a new OIDC Client and inside the new client, check "Public client" on OIDC Client Settings           |
-| [Zitadel](https://zitadel.com/)           | ✅      | Check the UserInfo box on the Token Settings                                                                |
-
-Do not use Confidential/Secret mode **only** client ID is needed.
-
-## Developing
-
-For a complete developers guide see [CONTRIBUTING.md](CONTRIBUTING.md)
-
-### Building
-
-Run:
-
-```bash
-CGO_ENABLED=false go build -v -o opkssh
-chmod u+x opkssh
-```
-
-to build with docker run:
-
-```bash
-./hack/build.sh
-```
-
-### Testing
-
-For unit tests run
-
-```bash
-go test ./...
-```
-
-For integration tests run:
-
-```bash
-./hack/integration-tests.sh
-```
-
-## More information
-
-### Documentation
-- [docs/config.md](docs/config.md) Documentation of opkssh configuration files.
-- [docs/policyplugins.md](docs/policyplugins.md) Documentation of opkssh policy plugins and how to use them to implement complex policies.
-- [scripts/installing.md](scripts/installing.md) Documentation of the server install script that opkssh uses to configure an SSH server to accept opkssh SSH certificates. Explains how to manually install opkssh on a server.
-
-### Guides
-- [CONTRIBUTING.md](https://github.com/openpubkey/opkssh/blob/main/CONTRIBUTING.md) Guide to contributing to opkssh (includes developer help).
-- [docs/gitlab-selfhosted.md](docs/gitlab-selfhosted.md) Guide on configuring and using a self hosted GitLab instance with opkssh.
-- [docs/paramiko.md](docs/paramiko.md) Guide to using the python SSH paramiko library with opkssh.
-- [docs/putty.md](docs/putty.md) Guide to using PuTTY with opkssh.
+See the [FAQ](./docs/FAQ.md) for answers to Frequently Asked Questions about finna-pk.

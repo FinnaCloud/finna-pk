@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openpubkey/openpubkey/pktoken"
+	"github.com/FinnaCloud/finna-pk/pktoken"
 	"golang.org/x/crypto/ssh"
 )
 

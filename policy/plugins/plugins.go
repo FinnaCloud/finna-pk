@@ -26,8 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/FinnaCloud/finna-pk/pktoken"
 	"github.com/kballard/go-shellquote"
-	"github.com/openpubkey/openpubkey/pktoken"
 	"github.com/openpubkey/opkssh/policy/files"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"

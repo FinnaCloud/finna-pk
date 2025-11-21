@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openpubkey/openpubkey/pktoken"
-	"github.com/openpubkey/opkssh/policy/plugins"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	//"github.com/openpubkey/opkssh/policy/plugins"
 	"golang.org/x/exp/slices"
 )
 
@@ -104,7 +104,7 @@ func (s *checkedClaims) UnmarshalJSON(data []byte) error {
 }
 
 // The default location for policy plugins
-const pluginPolicyDir = "/etc/opk/policy.d"
+const pluginPolicyDir = "/etc/finna-pk/policy.d"
 
 // EscapedSplit splits a string by a separator while ignoring the separator in quoted sections.
 // This is useful for strings that may contain the separator character as part of the string

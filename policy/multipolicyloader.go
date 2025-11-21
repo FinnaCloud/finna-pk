@@ -47,7 +47,7 @@ func NewMultiPolicyLoader(username string, loader OptionalLoader) *MultiPolicyLo
 }
 
 // MultiPolicyLoader implements policy.Loader by reading both the system default
-// policy (root policy) and user policy (~/.opk/auth_id where ~ maps to
+// policy (root policy) and user policy (~/.finna-pk/auth_id where ~ maps to
 // Username's home directory)
 type MultiPolicyLoader struct {
 	HomePolicyLoader   *HomePolicyLoader
@@ -97,7 +97,7 @@ func (l *MultiPolicyLoader) Load() (*Policy, Source, error) {
 }
 
 // ReadWithSudoScript specifies additional way of loading the policy in the
-// user's home directory (`~/.opk/auth_id`). This is needed when the
+// user's home directory (`~/.finna-pk/auth_id`). This is needed when the
 // AuthorizedKeysCommand user does not have privileges to transverse the user's
 // home directory. Instead we call run a command which uses special
 // sudoers permissions to read the policy file.

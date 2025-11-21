@@ -168,7 +168,7 @@ func (l *LoginCmd) Run(ctx context.Context) error {
 			if l.CreateConfigArg {
 				return config.CreateDefaultClientConfig(l.ConfigPathArg, l.Fs)
 			} else {
-				log.Printf("failed to find client config file to generate a default config, run `opkssh login --create-config` to create a default config file")
+				//log.Printf("failed to find client config file to generate a default config, run `finna-pk login --create-config` to create a default config file")
 			}
 			l.Config, err = config.NewClientConfig(config.DefaultClientConfig)
 			if err != nil {

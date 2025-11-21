@@ -20,11 +20,12 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jws"
 	"time"
 
 	"github.com/FinnaCloud/finna-pk/cosigner/msgs"
 	"github.com/FinnaCloud/finna-pk/pktoken"
-	"
 )
 
 type AuthCosigner struct {

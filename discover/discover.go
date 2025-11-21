@@ -27,7 +27,7 @@ import (
 	"net/http"
 
 	"github.com/FinnaCloud/finna-pk/gq"
-	"github.com/FinnaCloud/finna-pk/uti
+	"github.com/FinnaCloud/finna-pk/util"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jws"

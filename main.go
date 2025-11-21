@@ -168,7 +168,7 @@ func run() int {
 	// Define flags for login.
 	//loginCmd.Flags().BoolVar(&autoRefreshArg, "auto-refresh", false, "Automatically refresh PK token after login")
 	//loginCmd.Flags().StringVar(&configPathArg, "config-path", "", "Path to the client config file. Default: ~/.finna-pk/config.yml on linux and %APPDATA%\\.finna-pk\\config.yml on windows")
-	//loginCmd.Flags().BoolVar(&createConfigArg, "create-config", false, "Creates a client config file if it does not exist")
+	rootCmd.Flags().BoolVar(&createConfigArg, "create-config", false, "Creates a client config file if it does not exist")
 	//loginCmd.Flags().BoolVar(&configureArg, "configure", false, "Apply changes to ssh config and create ~/.ssh/opkssh directory")
 	//loginCmd.Flags().StringVar(&logDirArg, "log-dir", "", "Directory to write output logs")
 	//loginCmd.Flags().BoolVar(&disableBrowserOpenArg, "disable-browser-open", false, "Set this flag to disable opening the browser. Useful for choosing the browser you want to use")

@@ -113,7 +113,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/openpubkey/opkssh => ../opkssh
+replace github.com/openpubkey/opkssh => ./
 
 replace github.com/openpubkey/openpubkey => .
 

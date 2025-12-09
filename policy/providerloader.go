@@ -86,13 +86,6 @@ func (p *ProviderPolicy) CreateVerifier() (*verifier.Verifier, error) {
 			opts.Issuer = row.Issuer
 			opts.ClientID = row.ClientID
 			provider = providers.NewAzureOpWithOptions(opts)
-		} else if row.Issuer == "https://gitlab.com" {
-			opts := providers.GetDefaultGitlabOpOptions()
-			opts.Issuer = row.Issuer
-			opts.ClientID = row.ClientID
-			provider = providers.NewGitlabOpWithOptions(opts)
-		} else if row.Issuer == "https://token.actions.githubusercontent.com" {
-			provider = providers.NewGithubOp(row.Issuer, "")
 		} else {
 			opts := providers.GetDefaultGoogleOpOptions()
 			opts.Issuer = row.Issuer

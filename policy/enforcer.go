@@ -25,6 +25,8 @@ import (
 	"strings"
 
 	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/policy/plugins"
+
 	//"github.com/openpubkey/opkssh/policy/plugins"
 	"golang.org/x/exp/slices"
 )

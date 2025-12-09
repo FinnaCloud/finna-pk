@@ -26,14 +26,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/FinnaCloud/finna-pk/client"
-	"github.com/FinnaCloud/finna-pk/client/choosers"
-	"github.com/FinnaCloud/finna-pk/commands/config"
-	"github.com/FinnaCloud/finna-pk/oidc"
-	"github.com/FinnaCloud/finna-pk/pktoken"
-	"github.com/FinnaCloud/finna-pk/providers"
-	"github.com/FinnaCloud/finna-pk/sshcert"
-	"github.com/FinnaCloud/finna-pk/util"
 	"io"
 	"log"
 	"os"
@@ -42,6 +34,15 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/FinnaCloud/finna-pk/client"
+	"github.com/FinnaCloud/finna-pk/client/choosers"
+	"github.com/FinnaCloud/finna-pk/commands/config"
+	"github.com/FinnaCloud/finna-pk/oidc"
+	"github.com/FinnaCloud/finna-pk/pktoken"
+	"github.com/FinnaCloud/finna-pk/providers"
+	"github.com/FinnaCloud/finna-pk/sshcert"
+	"github.com/FinnaCloud/finna-pk/util"
 
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	//"github.com/FinnaCloud/finna-pk/client"
@@ -488,11 +489,11 @@ func (l *LoginCmd) login(ctx context.Context, provider providers.OpenIdProvider,
 		fmt.Printf("id_token:\n%s\n", idTokenStr)
 	}
 
-	idStr, err := IdentityString(*pkt)
+	_, err = IdentityString(*pkt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ID Token: %w", err)
 	}
-	fmt.Printf("Keys generated for identity\n%s\n", idStr)
+	//fmt.Printf("Keys generated for identity\n%s\n", idStr)
 
 	return &LoginCmd{
 		pkt:        pkt,
@@ -758,7 +759,7 @@ func (l *LoginCmd) writeKeys(seckeyPath string, pubkeyPath string, seckeySshPem 
 		return err
 	}
 
-	fmt.Printf("Writing opk ssh public key to %s and corresponding secret key to %s\n", pubkeyPath, seckeyPath)
+	fmt.Printf("Writing public key to %s and corresponding secret key to %s\n", pubkeyPath, seckeyPath)
 
 	certBytes = append(certBytes, []byte(" openpubkey")...)
 	// Write ssh public key (certificate) to filesystem
@@ -772,7 +773,7 @@ func (l *LoginCmd) writeKeysComment(seckeyPath string, pubkeyPath string, seckey
 		return err
 	}
 
-	fmt.Printf("Writing opk ssh public key to %s and corresponding secret key to %s\n", pubkeyPath, seckeyPath)
+	fmt.Printf("Writing public key to %s and corresponding secret key to %s\n", pubkeyPath, seckeyPath)
 
 	certBytes = append(certBytes, ' ')
 	certBytes = append(certBytes, pubKeyComment...)
@@ -826,8 +827,9 @@ Check if your client config (~/.finna-pk/config.yml) has the correct scopes conf
 Sub, issuer, audience:
 %s %s %s`, claims.Subject, claims.Issuer, claims.Audience), nil
 	} else {
-		return fmt.Sprintf(`Email, sub, issuer, audience: 
-%s %s %s %s`, claims.Email, claims.Subject, claims.Issuer, claims.Audience), nil
+		return "", nil
+		//		return fmt.Sprintf(`Email, sub, issuer, audience:
+		//%s %s %s %s`, claims.Email, claims.Subject, claims.Issuer, claims.Audience), nil
 	}
 }
 

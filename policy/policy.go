@@ -21,6 +21,8 @@ import (
 	"log"
 	"strings"
 	//"github.com/openpubkey/opkssh/policy/files"
+
+	"github.com/FinnaCloud/finna-pk/policy/files"
 )
 
 // User is an opkssh policy user entry
